@@ -1,48 +1,54 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import FollowersList from "../FollowersList";
+import FollowersList from '../FollowersList';
+import axios from 'axios';
+import { act } from 'react-dom/test-utils';
 
-const MockFollowersList = () => {
-    return (
-        <BrowserRouter>
-            <FollowersList />
-        </BrowserRouter>
-    )
-}
+const mockResponse = {
+  data: {
+    results: [
+      {
+        name: {
+          first: 'Russell',
+          last: 'Chan',
+        },
+        picture: {
+          large: 'https://randomuser.me/api/portraits/men/18.jpg',
+        },
+        login: {
+          username: 'jrchan30',
+        },
+      },
+    ],
+  },
+};
 
-describe("FollowersList", () => {
+const MockFollowersList = () => (
+  <BrowserRouter>
+    <FollowersList />
+  </BrowserRouter>
+);
 
-    beforeEach(() => {
-        // console.log("RUNS BEFORE EACH TEST")
-        jest.mock("../../../__mocks__/axios")
-    })
+jest.mock('axios');
 
-    // beforeAll(() => {
-    //     console.log("RUNS ONCE BEFORE ALL TESTS")
-    // })
+describe('FollowersList', () => {
+  //   afterEach(cleanup);
 
-    // afterEach(() => {
-    //     console.log("RUNS AFTER EACH TEST")
-    // })
-
-    // afterAll(() => {
-    //     console.log("RUNS ONCE AFTER ALL TESTS")
-    // })
-
-    it('should fetch and render input element', async () => {
-        render(
-            <MockFollowersList />
-        );
-        const followerDivElement = await screen.findByTestId(`follower-item-0`)
-        expect(followerDivElement).toBeInTheDocument();
+  it('should render follower item', async () => {
+    act(() => {
+      render(<MockFollowersList />);
+      axios.get.mockResolvedValue(mockResponse);
     });
-    
-    it('should fetch and render input element', async () => {
-        render(
-            <MockFollowersList />
-        );
-    
-        const followerDivElement = await screen.findByTestId(`follower-item-0`)
-        expect(followerDivElement).toBeInTheDocument();
-    });
-})
+    // axios.mockResolvedValueOnce(mockResponse);
+    const followerDivElement = await screen.findByTestId('follower-item-0');
+    screen.debug();
+    // expect(axios.get).toHaveBeenCalled();
+    expect(followerDivElement).toBeInTheDocument();
+  });
+
+  //   it('should render multiple follower items', async () => {
+  //     render(<MockFollowersList />);
+  //     const followerDivElements = await screen.findAllByTestId(/follower-item/i);
+  //     expect(followerDivElements.length).toBe(5);
+  //   });
+});
